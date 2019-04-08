@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>发现</title>
+    <link rel="stylesheet" href="../../../layui.css">
+</head>
+<style type="text/css">
+    .layui-find-list li img {
+        position: absolute;
+        left: 20px;
+        top: 13px;
+        width: 70px;
+        height: 70px;
+        border-radius: 100%;
+    }
+
+    .layui-find-list li {
+        position: relative;
+        height: 90px;;
+        padding: 10px 30px 5px 100px;
+        font-size: 0;
+        cursor: pointer;
+    }
+
+    .layui-find-list li * {
+        display: inline-block;
+        vertical-align: top;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .layui-find-list li span {
+        margin-top: 4px;
+        max-width: 155px;
+    }
+
+    .layui-find-list li p {
+        display: block;
+        line-height: 25px;
+        font-size: 12px;
+        color: #999;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .juli {
+        background: #C9C9C9;
+        padding-left: 10px; /*容器里面的内容从左边距离边框10个像素*/
+        padding-top: 15px; /*容器里面的内容从上边距离边框10个像素*/
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+</style>
+<body>
+<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+    <ul class="layui-tab-title">
+        <li class="layui-this" id="oneli">加好友</li>
+        <li id="towLi">加群</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <!--加好友-->
+            <form class="layui-form" action="">
+                <div class="layui-col-xs7 mt10" style=" width: 40%;">
+                    <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入/昵称/手机号/邮箱"
+                           class="layui-input friendText">
+                </div>
+                <div class="layui-col-xs1 mt15 ">
+                    <button class="layui-btn" id="btnFriend">查找好友</button>
+                </div>
+            </form>
+
+
+            <div id="friendView"></div>
+        </div>
+        <div class="layui-tab-item">
+            <!--加群-->
+            <form class="layui-form" action="">
+                <div class="layui-col-xs7 mt10" style=" width: 40%;">
+                    <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入/昵称/手机号/邮箱"
+                           class="layui-input">
+                </div>
+                <div class="layui-col-xs1 mt15">
+                    <button class="layui-btn">查找群</button>
+                </div>
+                <button class="layui-btn" id="createGroup">我要建群</button>
+            </form>
+
+            <div id="groupView"></div>
+        </div>
+    </div>
+</div>
+
+<script id="fri" type="text/html">
+    <div class="layui-row layui-col-space10 ">
+        {{# layui.each(d.list, function(index, item){ }}
+        <div class="layui-col-xs3 layui-find-list juli">
+            <li layim-event="add" data-type="friend" data-index="" data-uid="{{ item.id }}"
+                data-name="{{ item.username }}">
+                <img src="{{ item.avatar }}">
+                <span>{{ item.username }}</span>
+                <p>{{# if(item.sign === '' || item.sign === null){ }}我很懒，懒得写签名{{# } }}</p>
+                <button class="layui-btn layui-btn-xs btncolor add" data-type="friend"><i
+                        class="layui-icon">&#xe654;</i>加好友
+                </button>
+            </li>
+        </div>
+        {{# }); }}
+        {{# if(d.list.length === 0){ }}
+        无数据
+        {{# } }}
+    </div>
+</script>
+<script id="groupMoban" type="text/html">
+    <div class="layui-row layui-col-space10 ">
+        {{# layui.each(d.list, function(index, item){ }}
+        <div class="layui-col-xs3 layui-find-list juli">
+            <li layim-event="add" data-type="group" data-index="" data-uid="{{ item.id }}"
+                data-name="{{ item.group_name }}">
+                <img src="{{ item.group_avatar }}">
+                <span>{{ item.group_name }}</span>
+                <p>{{# if(item.group_introduce == ''){ }}群主很懒{{# } }}</p>
+                <button class="layui-btn layui-btn-xs btncolor add" data-type="group"><i class="layui-icon">&#xe654;</i>加群
+                </button>
+            </li>
+        </div>
+        {{# }); }}
+        {{# if(d.list.length === 0){ }}
+        无数据
+        {{# } }}
+    </div>
+
+</script>
+
+</body>
+</html>
+<script typet="text/javascript" src="../../../../layui.js"></script>
+<script>
+    layui.use(['layim', 'form', 'upload', 'element', 'jquery', 'laytpl'], function () {
+        var form = layui.form()
+            , layim = layui.layim
+            , upload = layui.upload
+            , element = layui.element
+            , $ = layui.jquery
+            , laytpl = layui.laytpl;
+      var findUrl = 'http://123.207.92.250:9999/Api/';
+        //点击查找好友事件
+        $('#btnFriend').click(function () {
+            var like = $('.friendText').val();
+            var uid = localStorage.getItem("uid");
+            $.post(findUrl + 'AddAction/selFriends', {like: like, type: 1, uid: uid}, function (data) {
+                if (data.code === 200) {
+                    layer.msg('加个好友吧');
+                    var getTpl = fri.innerHTML;
+                    laytpl(getTpl).render(data.data, function (html) {
+                        friendView.innerHTML = html;
+                    });
+                } else {
+                    layer.msg('暂时没有推荐的好友');
+                }
+            });
+        });
+        //页面初始化加载
+        $().ready(function () {
+            var uid = localStorage.getItem("uid");
+            $.post(findUrl+'AddAction/selFriends', {type: 1, uid: uid}, function (data) {
+                if (data.code === 200) {
+                    layer.msg('加个好友吧');
+                    var getTpl = fri.innerHTML;
+                    laytpl(getTpl).render(data.data, function (html) {
+                        friendView.innerHTML = html;
+                    });
+                } else {
+                    layer.msg('暂时没有推荐的好友');
+                }
+            });
+        });
+        //选项卡切换 加群
+        $('#towLi').click(function () {
+            var uid = localStorage.getItem("uid");
+            $.post(findUrl+'AddAction/selFriends', {type: 2, uid: uid}, function (data) {
+                if (data.code === 200) {
+                    layer.msg('加个群聊吧');
+                    //渲染群
+                    var gro = groupMoban.innerHTML;
+                    laytpl(gro).render(data.data, function (html) {
+                        groupView.innerHTML = html;
+                    });
+                } else {
+                    layer.msg('暂时没有推荐的群');
+                }
+            });
+        });
+        $('#oneli').click(function () {
+            var uid = localStorage.getItem("uid");
+            $.post(findUrl+'AddAction/selFriends', {type: 1, uid: uid}, function (data) {
+                if (data.code === 200) {
+                    layer.msg('加个好友吧');
+                    var getTpl = fri.innerHTML;
+                    laytpl(getTpl).render(data.data, function (html) {
+                        friendView.innerHTML = html;
+                    });
+                } else {
+                    layer.msg('暂时没有推荐的好友');
+                }
+            });
+        });
+
+        //添加事件
+        $('body').on('click', '.add', function () {
+            var othis = $(this)
+                , type = othis.data('type')//类型
+                , toId = othis.parent().parent().find("li").data('uid')
+                , toName = othis.parent().parent().find("li").data('name')
+                , src = othis.parent().find("img").attr("src");
+            var uid = localStorage.getItem("uid");
+            if (type === 'friend') {
+                layim.add({
+                    type: 'friend' //friend：申请加好友、group：申请加群
+                    , username: toName //好友昵称，若申请加群，参数为：groupname
+                    , avatar: src //头像
+                    , submit: function (group, remark, index) { //一般在此执行Ajax和WS，以通知对方
+                        $.post(findUrl+'AddAction/friendAdd', {
+                            id: toId,
+                            groupId: group,
+                            remark: remark,
+                            type: 1,
+                            uid: uid
+                        }, function (data) {
+                            if (data.code === 200) {
+                                layer.msg('好友申请发送成功');
+                                layer.close(index); //关闭改面板
+                            } else {
+                                layer.msg('好友申请发送失败');
+                            }
+                        });
+                    }
+                });
+            }
+            if (type === 'group') {
+                layim.add({
+                    type: 'group'
+                    , groupname: toName
+                    , avatar: src
+                    , submit: function (group, remark, index) { //一般在此执行Ajax和WS，以通知对方
+                        console.log(group); //获取选择的好友分组ID，若为添加群，则不返回值
+                        console.log(remark); //获取附加信息
+                        layer.close(index); //关闭改面板
+                    }
+                });
+            }
+
+        });
+        //创建群聊事件
+        $('#createGroup').click(function (code) {
+            layer.open({
+                title: '在线调试'
+                , content: '可以填写任意的layer代码'
+            });
+        })
+
+    });
+</script>

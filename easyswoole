@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+use EasySwoole\EasySwoole\Command\CommandRunner;
+
+define('EASYSWOOLE_ROOT', realpath(getcwd()));
+$file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
+if (file_exists($file)) {
+    require $file;
+}else{
+    die("include composer autoload.php fail\n");
+}
+
+$args = $argv;
+//trim first command
+array_shift($args);
+$ret = CommandRunner::getInstance()->run($args);
+if(!empty($ret)){
+    echo $ret."\n";
+}

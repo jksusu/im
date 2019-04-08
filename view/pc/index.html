@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>chat pc</title>
+    <link rel="stylesheet" href="../layui/mycss/contextMenu.css"/>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link href="../favicon.ico" rel="shortcuticon"/>
+    <style>
+        html {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+<button class="layui-btn layui-btn-primary" style="margin-top: 2%;margin-left: 3%" id="tuichu">退出账号</button>
+<script type='text/javascript' src="../layui/myjs/check.js"></script>
+<script type='text/javascript' src="../layui/layui.js"></script>
+<script type='text/javascript' src="../layui/myjs/contextMenu.js"></script>
+<script>
+    //layui绑定扩展
+    layui.config({
+        base: '../layui/myjs/'
+    }).extend({
+        core: 'core',
+    });
+    layui.use(['layim', 'jquery', 'core'], function (layim) {
+        var $ = layui.jquery;
+        var core = layui.core;
+        var UUrl = 'http://123.207.92.250:9999/Api/';
+        core.config({
+            uid: localStorage.getItem("uid"),
+            layim: layim,
+        });
+        //点击鼠标右键
+        layim.on('ready', function () {
+            layui.core.right();
+        });
+
+        layim.config({
+            //初始化接口
+            init: {
+                url: url+'Index/init'
+                , type: 'post'
+                , data: {uid: localStorage.getItem("uid")}
+            }
+
+            //查看群员接口
+            , members: {
+                url: url+'Index/getMembers'
+                , data: {}
+            }
+
+            //上传图片接口
+            , uploadImage: {
+                url: url+'Upload/autograph' //（返回的数据格式见下文）
+                , type: '' //默认post
+            }
+
+            //上传文件接口
+            , uploadFile: {
+                url: '/upload/file' //（返回的数据格式见下文）
+                , type: '' //默认post
+            }
+
+            //扩展工具栏
+            , msgbox: layui.cache.dir + 'css/modules/layim/html/msgbox.html' //消息盒子页面地址，若不开启，剔除该项即可
+            , find: layui.cache.dir + 'css/modules/layim/html/find.html' //发现页面地址，若不开启，剔除该项即可
+            , chatLog: layui.cache.dir + 'css/modules/layim/html/chatLog.html' //聊天记录页面地址，若不开启，剔除该项即可
+
+        });
+
+        //确认退出
+        $('#tuichu').click(function () {
+            layer.open({
+                anim: 1,
+                skin: 'layui-layer-molv',
+                content: '确认退出？',
+                yes: function (layero, index) {
+                    localStorage.removeItem("uid");
+                    location.href='../login.html';
+                    console.log(layero, index);
+                }
+            });
+        });
+    });
+</script>
